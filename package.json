@@ -1,0 +1,35 @@
+{
+  "name": "se_project_express",
+  "version": "1.0.0",
+  "description": "Backend server functions for WTWR project",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leishmanitus/se_project_express.git"
+  },
+  "author": "Tyler Leishman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Leishmanitus/se_project_express/issues"
+  },
+  "homepage": "https://github.com/Leishmanitus/se_project_express#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.4",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.1"
+  }
+}

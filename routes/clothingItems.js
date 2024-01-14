@@ -3,6 +3,6 @@ const { getItems, createItem, deleteItem } = require('../controllers/clothingIte
 
 router.get('/', getItems);
 router.post('/', createItem);
-router.delete('/', deleteItem);
+router.delete('/:itemId', deleteItem);
 
 module.exports = router;

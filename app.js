@@ -9,6 +9,14 @@ mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db')
 .then(() => {console.log(`Connected to db`)})
 .catch(err => {console.error(`DB error: ${err.status}`)});
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: '65a404adf38139665f900918',
+  };
+
+  next();
+});
+
 app.use(express.json());
 app.use(routes);
 

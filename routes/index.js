@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const usersRoute = require('./users');
 const clothingItemsRoute = require('./clothingItems');
+const likesRoute = require('./likes');
 
 // router.use('/', (req, res, next) => {
 //   if (res.status !== 'ok') {
@@ -10,5 +11,6 @@ const clothingItemsRoute = require('./clothingItems');
 // })
 router.use('/users', usersRoute);
 router.use('/items', clothingItemsRoute);
+router.use('/items/:id/likes', likesRoute);
 
 module.exports = router;

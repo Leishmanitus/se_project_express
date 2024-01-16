@@ -1,5 +1,5 @@
 const Item = require('../models/clothingItems');
-const { isValidId } = require('../utils/errors');
+const { sendErrorStatus, isValidId } = require('../utils/errors');
 
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -11,7 +11,8 @@ module.exports.createItem = (req, res) => {
   })
   .catch(err => {
     console.error(err);
-    res.status(err.statusCode).send({ message: err.message });
+    const error = sendErrorStatus(err);
+    res.status(error.status).send({message:err.message});
   });
 };
 
@@ -23,7 +24,8 @@ module.exports.getItems = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      res.status(err.statusCode).send({ message: err.message });
+      const error = sendErrorStatus(err);
+      res.status(error.status).send({message:err.message});
     });
 };
 
@@ -31,13 +33,16 @@ module.exports.getItem = (req, res) => {
   const { _id } = req.params;
 
   Item.find({_id})
+    .orFail()
     .populate()
     .then(item => {
+      isValidId(user._id);
       res.send({ data: item });
     })
     .catch(err => {
       console.error(err);
-      res.status(err.statusCode).send({ message: err.message });
+      const error = sendErrorStatus(err);
+      res.status(error.status).send({message:err.message});
     });
 };
 
@@ -47,24 +52,28 @@ module.exports.updateItem = (req, res) => {
   Item.updateOne({ _id }, req.body)
     .orFail()
     .then(item => {
+      isValidId(user._id);
       res.send({ data: item });
     })
     .catch(err => {
       console.error(err);
-      res.status(err.statusCode).send({ message: err.message });
+      const error = sendErrorStatus(err);
+      res.status(error.status).send({message:err.message});
     });
 };
 
 module.exports.deleteItem = (req, res) => {
   const { _id } = req.params;
 
-  Item.deleteOne({_id: _id})
-  .orFail(_id => isValidId(_id))
+  Item.deleteOne({ _id })
+  .orFail()
   .then(item => {
+    isValidId(user._id);
     res.send({ data: item });
   })
   .catch(err => {
     console.error(err);
-    res.status(err.statusCode).send({ message: err.message });
+    const error = sendErrorStatus(err);
+    res.status(error.status).send({message:err.message});
   });
 };

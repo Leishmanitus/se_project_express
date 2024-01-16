@@ -1,12 +1,43 @@
+const Item = require('../models/clothingItems');
+const { sendErrorStatus } = require('../utils/errors');
 
-module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
-  req.params._id,
-  { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
-  { new: true },
-);
+module.exports.likeItem = (req, res) => {
+  const { _id } = req.params;
 
-module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
-  req.params._id,
-  { $pull: { likes: req.user._id } }, // remove _id from the array
-  { new: true },
-);
+  Item.findByIdAndUpdate(
+    _id,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail()
+    .then(like => {
+      isValidId(_id);
+      res.status(200).send({ data: like });
+    })
+    .catch(err => {
+      console.error(err);
+      console.log(err.name);
+      const error = sendErrorStatus(err);
+      res.status(error.status).send({message:err.message});
+    });
+};
+
+module.exports.dislikeItem = (req, res) => {
+  const { _id } = req.params;
+
+  Item.findByIdAndUpdate(
+    _id,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
+    .orFail()
+    .then(like => {
+      isValidId(_id);
+      res.status(200).send({ data: like });
+    })
+    .catch(err => {
+      console.error(err);
+      const error = sendErrorStatus(err);
+      res.status(error.status).send({message:err.message});
+    });
+};

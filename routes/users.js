@@ -4,7 +4,7 @@ const { getUsers, getUser, createUser, updateUser, deleteUser} = require('../con
 router.post('/', createUser);
 router.get('/', getUsers);
 router.get('/:_id', getUser);
-router.put('/:_id', updateUser);
+router.patch('/:_id', updateUser);
 router.delete('/:_id',deleteUser);
 
 module.exports = router;

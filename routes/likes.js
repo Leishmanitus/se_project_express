@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { likeItem, dislikeItem } = require('../controllers/likes');
 
-router.put('/:_id', likeItem);
-router.delete('/:_id', dislikeItem);
+router.put('/', likeItem);
+router.delete('/', dislikeItem);
 
 module.exports = router;

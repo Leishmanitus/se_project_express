@@ -1,31 +1,26 @@
 const mongoose = require('mongoose');
 
-class ValidationError extends mongoose.Error.ValidationError {
-  constructor(){
-    super();
-  }
-}
-
-module.exports.isValidId = (_id) => {
-  if(!mongoose.isValidObjectId(_id)){
-    throw ValidationError;
-  }
-};
-
 module.exports.sendErrorStatus = (err) => {
-  const status400 = { status: 400 };
-  const status404 = { status: 404 };
-  const status500 = { status: 500 };
+  const validationErrorStatus = { status: 400, message: "Invalid data" };
+  const castErrorStatus = { status: 400, message: "Could not cast ObjectId" }
+  const DocumentNotFoundErrorStatus = { status: 404, message: "Does not exist" };
+  const defaultErrorStatus = { status: 500, message: "Internal Server Error" };
 
   if(err.name === "ValidationError"){
-    return status400;
-  } else if(err.name === "CastError"){
-    return status400;
-  } else if(err.name === "TypeError"){
-    return status400;
-  } else if(err.name === "DocumentNotFoundError"){
-    return status404;
-  } else {
-    return status500;
+    return validationErrorStatus;
   }
+  if(err.name === "CastError"){
+    return castErrorStatus;
+  }
+  if(err.name === "DocumentNotFoundError"){
+    return DocumentNotFoundErrorStatus;
+  }
+  return defaultErrorStatus;
+};
+
+module.exports.handleUnknownRoute = (req, res, next) => {
+  if (res.status !== 'ok') {
+    throw mongoose.Error.DocumentNotFoundError;
+  }
+  next();
 };

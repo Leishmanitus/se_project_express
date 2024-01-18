@@ -1,8 +1,9 @@
 const Item = require('../models/clothingItems');
-const { sendErrorStatus, isValidId } = require('../utils/errors');
+const { sendErrorStatus } = require('../utils/errors');
 
 module.exports.likeItem = (req, res) => {
   const { _id } = req.params;
+  console.log(req.params);
 
   Item.findByIdAndUpdate(
     _id,
@@ -11,13 +12,12 @@ module.exports.likeItem = (req, res) => {
   )
     .orFail()
     .then(like => {
-      isValidId(_id);
       res.status(200).send({ data: like });
     })
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status).send({message:err.message});
+      res.status(error.status).send({message:error.message || err.message});
     });
 };
 
@@ -31,12 +31,11 @@ module.exports.dislikeItem = (req, res) => {
   )
     .orFail()
     .then(like => {
-      isValidId(_id);
       res.status(200).send({ data: like });
     })
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status).send({message:err.message});
+      res.status(error.status).send({message:error.message || err.message});
     });
 };

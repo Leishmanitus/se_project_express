@@ -1,9 +1,24 @@
 # WTWR (What to Wear?): Back End
-The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
-## Running the Project
-`npm run start` — to launch the server 
+This project focuses on creating a back-end for the WTWR project. Here we use express.js and the mongoose framework to create a server. Inside the server the user is able to Create Read Update Delete data from the database with a custom made API. The API uses current standards and practices for handling errors.
 
-`npm run dev` — to launch the server with the hot reload feature
+## Technologies
+JavaScript
+  Express.js
 
-### Testing
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+MongoDb
+  mongoose
+
+EsLint
+
+Git
+
+## Techniques
+Express.js is the main back-end framework used to handle all the server-side routing and logic.
+
+We use MongoDb as the database to store all the user data.
+
+The user can create new items thanks to Mongoose, which is an Object modeling tool framework of Node.js.
+
+We use a linter like EsLint to catch any last minute bugs before commiting.
+
+Through the Bash terminal, we push commits to github for version control.

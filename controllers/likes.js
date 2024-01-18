@@ -1,5 +1,5 @@
 const Item = require('../models/clothingItems');
-const { sendErrorStatus } = require('../utils/errors');
+const { sendErrorStatus, isValidId } = require('../utils/errors');
 
 module.exports.likeItem = (req, res) => {
   const { _id } = req.params;
@@ -16,7 +16,6 @@ module.exports.likeItem = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      console.log(err.name);
       const error = sendErrorStatus(err);
       res.status(error.status).send({message:err.message});
     });

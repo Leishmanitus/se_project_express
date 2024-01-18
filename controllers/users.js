@@ -32,7 +32,7 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUser = (req, res) => {
   const { _id } = req.params;
 
-  User.find({ _id })
+  User.findById({ _id })
     .orFail()
     .populate()
     .then(user => {
@@ -41,6 +41,7 @@ module.exports.getUser = (req, res) => {
     })
     .catch(err => {
       console.error(err);
+      console.log(err.name);
       const error = sendErrorStatus(err);
       res.status(error.status).send({message:err.message});
     });
@@ -49,7 +50,7 @@ module.exports.getUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { _id } = req.params;
 
-  User.updateOne({ _id }, req.body)
+  User.findByIdAndUpdate({ _id }, req.body)
     .orFail()
     .then(user => {
       isValidId(user._id);
@@ -65,7 +66,7 @@ module.exports.updateUser = (req, res) => {
 module.exports.deleteUser = (req, res) => {
   const { _id } = req.params;
 
-  User.deleteOne({ _id })
+  User.findByIdAndDelete({ _id })
     .orFail()
     .then(user => {
       isValidId(user._id);

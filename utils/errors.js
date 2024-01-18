@@ -8,9 +8,7 @@ class ValidationError extends mongoose.Error.ValidationError {
 
 module.exports.isValidId = (_id) => {
   if(!mongoose.isValidObjectId(_id)){
-    return new Promise((resolve, reject) => {
-      reject(new ValidationError());
-    });
+    throw ValidationError;
   }
 };
 
@@ -23,9 +21,7 @@ module.exports.sendErrorStatus = (err) => {
     return status400;
   } else if(err.name === "CastError"){
     return status400;
-  } else if(err.name === "AssertionError"){
-    return status400;
-  } else if(err.name === "ValidatorError"){
+  } else if(err.name === "TypeError"){
     return status400;
   } else if(err.name === "DocumentNotFoundError"){
     return status404;

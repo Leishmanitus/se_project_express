@@ -11,6 +11,6 @@ const likesRoute = require('./likes');
 // })
 router.use('/users', usersRoute);
 router.use('/items', clothingItemsRoute);
-router.use('/items/:id/likes', likesRoute);
+router.use('/items/', likesRoute);
 
 module.exports = router;

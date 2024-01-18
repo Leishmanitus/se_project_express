@@ -32,11 +32,11 @@ module.exports.getItems = (req, res) => {
 module.exports.getItem = (req, res) => {
   const { _id } = req.params;
 
-  Item.find({_id})
+  Item.findById({_id})
     .orFail()
     .populate()
     .then(item => {
-      isValidId(user._id);
+      isValidId(item._id);
       res.send({ data: item });
     })
     .catch(err => {
@@ -49,10 +49,10 @@ module.exports.getItem = (req, res) => {
 module.exports.updateItem = (req, res) => {
   const { _id } = req.params;
 
-  Item.updateOne({ _id }, req.body)
+  Item.findByIdAndUpdate({ _id }, req.body)
     .orFail()
     .then(item => {
-      isValidId(user._id);
+      isValidId(item._id);
       res.send({ data: item });
     })
     .catch(err => {
@@ -65,10 +65,10 @@ module.exports.updateItem = (req, res) => {
 module.exports.deleteItem = (req, res) => {
   const { _id } = req.params;
 
-  Item.deleteOne({ _id })
+  Item.findByIdAndDelete({ _id })
   .orFail()
   .then(item => {
-    isValidId(user._id);
+    isValidId(item._id);
     res.send({ data: item });
   })
   .catch(err => {

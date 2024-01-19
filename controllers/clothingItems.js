@@ -4,10 +4,9 @@ const { sendErrorStatus } = require('../utils/errors');
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  Item.create({ name, weather, imageUrl })
+  Item.create({ name, weather, imageUrl, owner: req.user._id })
   .then(item => {
     res.send({ data: item });
-    item.owner = req.user._id;
   })
   .catch(err => {
     console.error(err);

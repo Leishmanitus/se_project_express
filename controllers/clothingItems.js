@@ -1,17 +1,17 @@
 const Item = require('../models/clothingItems');
-const { sendErrorStatus } = require('../utils/errors');
+const { sendErrorStatus, checkUserId } = require('../utils/errors');
 
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  Item.create({ name, weather, imageUrl, owner: req.user._id })
+  Item.create({ name, weather, imageUrl })
   .then(item => {
     res.send({ data: item });
   })
   .catch(err => {
     console.error(err);
     const error = sendErrorStatus(err);
-    res.status(error.status).send({message:error.message || err.message});
+    res.status(error.status || 500).send({ message:error.message || err.message });
   });
 };
 
@@ -23,7 +23,7 @@ module.exports.getItems = (req, res) => {
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status).send({message:error.message || err.message});
+      res.status(error.status || 500).send({ message:error.message || err.message });
     });
 };
 
@@ -33,11 +33,12 @@ module.exports.deleteItem = (req, res) => {
   Item.findByIdAndDelete({ _id })
   .orFail()
   .then(item => {
+    checkUserId(_id, Item.user._id);
     res.send({ data: item });
   })
   .catch(err => {
     console.error(err);
     const error = sendErrorStatus(err);
-    res.status(error.status).send({message:error.message || err.message});
+    res.status(error.status || 500).send({ message:error.message || err.message });
   });
 };

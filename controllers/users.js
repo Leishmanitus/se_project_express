@@ -1,15 +1,13 @@
 const User = require('../models/users');
-const { sendErrorStatus, checkUserId, checkUserEmail } = require('../utils/errors');
+const jwt = require('jsonwebtoken');
+const { sendErrorStatus, checkUserId } = require('../utils/errors');
 
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar, email, password })
+    User.signupNewUser({ name, avatar, email, password })
     .then(user => {
       const { name, avatar, email } = user;
-      User.findOne({email}).then(user => {
-        return checkUserEmail(user);
-      })
 
       res.send({
         data: {
@@ -105,6 +103,7 @@ module.exports.login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const { name, avatar, email } = user;
+      const token = jwt.sign({ _id }, 'Bearer ', { expiresIn: 3600 });
 
       checkUserId(_id, User._id);
       res.send({
@@ -112,7 +111,8 @@ module.exports.login = (req, res) => {
           name,
           avatar,
           email,
-        }
+        },
+        token
       });
     })
     .catch(err => {

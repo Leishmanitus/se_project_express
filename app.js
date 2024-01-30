@@ -18,8 +18,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db')
 .then(() => {console.log(`Connected to db`)})
 .catch(err => {console.error(`DB error: ${err.status}`)});
 
-app.use(helmet());
 app.use(cors());
+app.use(helmet());
 
 app.use(express.json());
 app.use(routes);

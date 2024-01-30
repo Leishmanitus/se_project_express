@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const { checkUserExists, checkUserPassword } = require('../utils/errors');
+const { checkForConflict, checkUserPassword, handleMissingField } = require('../utils/errors');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -40,20 +40,35 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials({ email, password }) {
-  console.log(this);
-
   return this.findOne({ email })
+    .orFail()
     .select('+password')
     .then((user) => {
-      checkUserExists(user);
+      if( !email || !password ) {
+        handleMissingField();
+      }
+      checkForConflict(user);
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           checkUserPassword(matched);
 
-          return user;;
+          return user;
         });
     });
+};
+
+userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email, password }) {
+  return this.findOne({ email })
+    .then(user => {
+      if( !name || !avatar || !email || !password ){
+        handleMissingField();
+      }
+      checkForConflict(user);
+
+      return bcrypt.hash(password, 10);
+    })
+    .then(hash => this.create({ name, avatar, email, password: hash }))
 };
 
 module.exports = mongoose.model('user', userSchema);

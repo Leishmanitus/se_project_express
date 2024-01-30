@@ -1,13 +1,8 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { handleAuthError, handleValidationError } = require('../utils/errors');
 
 const { JWT_SECRET } = process.env;
-
-const handleAuthError = (res) => {
-  res
-    .status(401)
-    .send({ message: 'Authorization Error' });
-};
 
 const extractBearerToken = (header) => {
   return header.replace('Bearer ', '');
@@ -15,6 +10,12 @@ const extractBearerToken = (header) => {
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return handleValidationError(res);
+  }
+  console.log(authorization);
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return handleAuthError(res);

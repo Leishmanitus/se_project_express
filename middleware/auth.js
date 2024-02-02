@@ -1,36 +1,34 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { handleAuthError, handleValidationError } = require('../utils/errors');
+const { handleAuthError } = require('../utils/errors');
 
 const { JWT_SECRET } = process.env;
 
-const extractBearerToken = (header) => {
-  return header.replace('Bearer ', '');
-};
+const extractToken = (header) => header.replace('Bearer ', '');
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return handleValidationError(res);
-  }
-  console.log(authorization);
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res);
+    return handleAuthError(res, "Authorization header is missing or invalid");
   }
 
-  const token = extractBearerToken(authorization);
+  const token = extractToken(authorization);
   let payload;
 
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return handleAuthError(res);
+    return handleAuthError(res, "Token is invalid or has expired");
+  }
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  if(payload.exp && payload.exp < currentTime){
+    return handleAuthError(res, "Token has expired");
   }
 
   req.user = payload;
+  console.log(req.user);
 
   next();
 };

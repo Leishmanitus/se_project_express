@@ -1,4 +1,16 @@
-const mongoose = require('mongoose');
+class ValidationError extends Error {
+  constructor() {
+    super();
+    this.name = "ValidationError";
+  }
+}
+
+class DocumentNotFoundError extends Error {
+  constructor() {
+    super();
+    this.name = "DocumentNotFoundError";
+  }
+}
 
 class AuthenticationError extends Error {
   constructor() {
@@ -22,7 +34,7 @@ class ConflictError extends Error {
 }
 
 const statusDict = {
-  validationErrorStatus: { status: 400, message: "Invalid entry" },
+  validationErrorStatus: { status: 400, message: "Invalid or missing entry" },
   castErrorStatus: { status: 400, message: "Could not cast ObjectId" },
   authenticationErrorStatus: { status: 401, message: "Incorrect email or password" },
   identificationErrorStatus: { status: 403, message: "Not allowed" },
@@ -53,43 +65,21 @@ module.exports.sendErrorStatus = (err) => {
   return statusDict.defaultErrorStatus;
 };
 
-module.exports.checkUserId = (requestId, userId) => {
-  if(requestId !== userId){
-    throw new IdentificationError();
-  }
-};
+module.exports.checkUserId = (requestId, userId) => requestId !== userId ? new IdentificationError() : false;
 
-module.exports.checkForConflict = (match) => {
-  if(match){
-    throw new ConflictError();
-  }
-}
+module.exports.checkForConflict = (match) => match ? new ConflictError() : false;
 
-module.exports.checkUserPassword = (match) => {
-  if(!match) {
-    throw new AuthenticationError();
-  }
-}
+module.exports.checkUserExists = (match) => !match ? new ValidationError() : false;
 
-module.exports.handleAuthError = handleAuthError = (res) => {
-  return res
-    .status(401)
-    .send({ message: 'Authorization Error' });
-};
+module.exports.checkUserPassword = (match) => !match ? new AuthenticationError() : false;
 
-module.exports.handleValidationError = handleValidationError = (res) => {
-  return res
-    .status(400)
-    .send({ message: 'Invalid entry' });
-};
+module.exports.handleAuthError = (res, message) => res.status(401).send({ message });
 
-module.exports.handleMissingField = () => {
-  throw new mongoose.Error.ValidationError();
-};
+module.exports.handleMissingField = () => Promise.reject(new ValidationError());
 
 module.exports.handleUnknownRoute = (req, res, next) => {
   if (!res.status.ok) {
-    throw new mongoose.Error.DocumentNotFoundError();
+    throw new DocumentNotFoundError();
   }
   next();
 };

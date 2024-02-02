@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const { checkForConflict, checkUserPassword, handleMissingField } = require('../utils/errors');
+const jwt = require('jsonwebtoken');
+const { checkForConflict, checkUserPassword, checkUserExists, handleMissingField } = require('../utils/errors');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -39,15 +40,18 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.statics.findUserByCredentials = function findUserByCredentials({ email, password }) {
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
+  if( !email || !password ) {
+    return handleMissingField();
+  }
+
   return this.findOne({ email })
-    .orFail()
     .select('+password')
     .then((user) => {
-      if( !email || !password ) {
-        handleMissingField();
+      const conflict = checkUserExists(user);
+      if(conflict){
+        throw conflict;
       }
-      checkForConflict(user);
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
@@ -59,12 +63,14 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials({ emai
 };
 
 userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email, password }) {
+  if( !name || !avatar || !email || !password ){
+    return handleMissingField();
+  }
+
   return this.findOne({ email })
     .then(user => {
-      if( !name || !avatar || !email || !password ){
-        handleMissingField();
-      }
-      checkForConflict(user);
+      const conflict = checkForConflict(user);
+      if(conflict) throw conflict;
 
       return bcrypt.hash(password, 10);
     })

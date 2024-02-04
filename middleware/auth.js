@@ -1,8 +1,7 @@
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 const { handleAuthError } = require('../utils/errors');
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, NODE_ENV } = process.env;
 
 const extractToken = (header) => header.replace('Bearer ', '');
 
@@ -17,7 +16,7 @@ module.exports = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, JWT_SECRET);
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev_secret');
   } catch (err) {
     return handleAuthError(res, "Token is invalid or has expired");
   }
@@ -28,7 +27,6 @@ module.exports = (req, res, next) => {
   }
 
   req.user = payload;
-  console.log(req.user);
 
   next();
 };

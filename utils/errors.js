@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 class ValidationError extends Error {
   constructor() {
     super();
@@ -66,6 +68,12 @@ module.exports.sendErrorStatus = (err) => {
 };
 
 module.exports.checkUserId = (requestId, userId) => requestId !== userId ? new IdentificationError() : false;
+
+module.exports.checkObjectId = (objectId, otherId) => {
+  objectId = new mongoose.Types.ObjectId(objectId);
+  otherId = new mongoose.Types.ObjectId(otherId);
+  return objectId.equals(otherId) ? false : new IdentificationError()
+};
 
 module.exports.checkForConflict = (match) => match ? new ConflictError() : false;
 

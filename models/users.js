@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { checkForConflict, checkUserPassword, checkUserExists, handleMissingField } = require('../utils/errors');
 
 const userSchema = new mongoose.Schema({
@@ -47,11 +46,9 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
 
   return this.findOne({ email })
     .select('+password')
-    .then((user) => {
+    .then(user => {
       const conflict = checkUserExists(user);
-      if(conflict){
-        throw conflict;
-      }
+      if(conflict) throw conflict;
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {

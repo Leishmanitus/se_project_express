@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const routes = require('./routes/index');
 
-require('dotenv').config();
+require('dotenv').config({path:'./configs/.env'});
 
 const {PORT=3001} = process.env;
 const app = express();

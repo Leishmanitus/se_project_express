@@ -1,5 +1,5 @@
 const Item = require('../models/clothingItems');
-const { sendErrorStatus, checkUserId } = require('../utils/errors');
+const { sendErrorStatus, checkObjectId } = require('../utils/errors');
 
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -33,7 +33,12 @@ module.exports.deleteItem = (req, res) => {
   Item.findByIdAndDelete({ _id })
   .orFail()
   .then(item => {
-    checkUserId(_id, Item.user._id);
+    console.log(["Owner: ", item.owner]);
+    console.log(["Requestor: ", req.user._id]);
+
+    const userError = checkObjectId(item.owner, req.user._id);
+    if (userError) throw userError;
+
     res.send({ data: item });
   })
   .catch(err => {
@@ -45,11 +50,10 @@ module.exports.deleteItem = (req, res) => {
 
 module.exports.likeItem = (req, res) => {
   const { _id } = req.params;
-  console.log(req.params);
 
   Item.findByIdAndUpdate(
     _id,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: Item.owner } },
     { new: true },
   )
     .orFail()
@@ -68,7 +72,7 @@ module.exports.dislikeItem = (req, res) => {
 
   Item.findByIdAndUpdate(
     _id,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: Item.owner } },
     { new: true },
   )
     .orFail()

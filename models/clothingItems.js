@@ -22,18 +22,21 @@ const clothingItemsSchema = new mongoose.Schema({
     }
   },
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Types.ObjectId,
     ref: 'user',
-    required: true,
   },
   likes: {
-    type: [],
-    ref: 'likes',
+    type: [mongoose.Types.ObjectId],
+    ref: 'user',
   },
   createdAt: {
     type: Date,
     default: () => Date.now(),
   }
+});
+
+clothingItemsSchema.pre("find", function() {
+  this.populate({path: "user", select: "_id", strictPopulate: false});
 });
 
 module.exports = mongoose.model('clothingItem', clothingItemsSchema);

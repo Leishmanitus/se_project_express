@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
-const ObjectId = require('mongoose').mongo.ObjectId;
 const { sendErrorStatus, checkObjectId } = require('../utils/errors');
 
 const { JWT_SECRET, NODE_ENV } = process.env;
@@ -28,6 +27,8 @@ module.exports.getCurrentUser = (req, res) => {
     .orFail()
     .then(user => {
       const { name, avatar, email } = user;
+      const idError = checkObjectId(user._id.toString(), req.user._id.toString());
+      if (idError) throw idError;
 
       res.status(200).send({ data: { name, avatar, email } });
     })
@@ -44,28 +45,10 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate({ _id }, { name:req.body.name, avatar:req.body.avatar }, {new: true})
     .orFail()
     .then(user => {
+      const idError = checkObjectId(user._id.toString(), req.user._id.toString());
+      if (idError) throw idError;
+
       res.status(200).send({ data: user });
-    })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status || 500).send({ message:error.message || err.message });
-    });
-};
-
-module.exports.deleteUser = (req, res) => {
-  const { _id } = req.params;
-
-  User.findByIdAndDelete({ _id })
-    .orFail()
-    .then(user => {
-      const { name, avatar, email } = user;
-      const otherId = new ObjectId(req.user._id);
-
-      const conflict = checkObjectId(user._id, otherId);
-      if(conflict) throw conflict;
-
-      res.status(200).send({ data: { name, avatar, email } });
     })
     .catch(err => {
       console.error(err);

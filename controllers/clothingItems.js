@@ -4,7 +4,7 @@ const { sendErrorStatus, checkObjectId } = require('../utils/errors');
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  Item.create({ name, weather, imageUrl })
+  Item.create({ name, weather, imageUrl, owner: req.user._id })
   .then(item => {
     res.send({ data: item });
   })
@@ -33,11 +33,8 @@ module.exports.deleteItem = (req, res) => {
   Item.findByIdAndDelete({ _id })
   .orFail()
   .then(item => {
-    console.log(["Owner: ", item.owner]);
-    console.log(["Requestor: ", req.user._id]);
-
-    const userError = checkObjectId(item.owner, req.user._id);
-    if (userError) throw userError;
+    const idError = checkObjectId(item.owner.toString(), req.user._id.toString());
+    if (idError) throw idError;
 
     res.send({ data: item });
   })
@@ -58,6 +55,9 @@ module.exports.likeItem = (req, res) => {
   )
     .orFail()
     .then(like => {
+      const idError = checkObjectId(like.owner.toString(), req.user._id.toString());
+      if (idError) throw idError;
+
       res.status(200).send({ data: like });
     })
     .catch(err => {
@@ -77,6 +77,9 @@ module.exports.dislikeItem = (req, res) => {
   )
     .orFail()
     .then(like => {
+    const idError = checkObjectId(like.owner.toString(), req.user._id.toString());
+    if (idError) throw idError;
+
       res.status(200).send({ data: like });
     })
     .catch(err => {

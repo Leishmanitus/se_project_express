@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const { checkForConflict, checkUserPassword, checkUserExists, handleMissingField } = require('../utils/errors');
+const { checkForConflict, checkForMatch, checkUserExists, handleMissingField } = require('../utils/errors');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -31,11 +31,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     select: false,
-    // validate: {
-    //   validator: (v) => validator.isStrongPassword(v),
-    //   message: "Password is not strong enough",
-    // },
-    minLength: 8,
   },
 });
 
@@ -47,14 +42,17 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
   return this.findOne({ email })
     .select('+password')
     .then(user => {
-      const conflict = checkUserExists(user);
-      if(conflict) throw conflict;
+      return this.exists({ email }).then(exists => {
+        const existsError = checkUserExists(exists);
+        if (existsError) throw existsError;
 
+        return user;
+      });
+    })
+    .then(user => {
       return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          checkUserPassword(matched);
-
-          return user;
+        .then((match) => {
+          return checkForMatch(match, user);
         });
     });
 };
@@ -64,10 +62,10 @@ userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email,
     return handleMissingField();
   }
 
-  return this.findOne({ email })
-    .then(user => {
-      const conflict = checkForConflict(user);
-      if(conflict) throw conflict;
+  return this.exists({ email })
+    .then(duplicate => {
+      const conflictError = checkForConflict(duplicate);
+      if(conflictError) throw conflictError;
 
       return bcrypt.hash(password, 10);
     })

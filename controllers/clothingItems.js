@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Item = require('../models/clothingItems');
 const { sendErrorStatus, checkObjectId } = require('../utils/errors');
 
@@ -11,7 +12,7 @@ module.exports.createItem = (req, res) => {
   .catch(err => {
     console.error(err);
     const error = sendErrorStatus(err);
-    res.status(error.status || 500).send({ message:error.message || err.message });
+    res.status(error.status).send({ message:error.message || err.message });
   });
 };
 
@@ -23,25 +24,25 @@ module.exports.getItems = (req, res) => {
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status || 500).send({ message:error.message || err.message });
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };
 
 module.exports.deleteItem = (req, res) => {
   const { _id } = req.params;
 
-  Item.findByIdAndDelete({ _id })
+  Item.findById({ _id })
   .orFail()
   .then(item => {
-    const idError = checkObjectId(item.owner.toString(), req.user._id.toString());
-    if (idError) throw idError;
+    const idError = checkObjectId(res, item.owner, req.user._id);
+    if (idError) return idError;
 
-    res.send({ data: item });
+    return item.deleteOne().then(() => res.send({ message: "Item deleted" }));
   })
   .catch(err => {
     console.error(err);
     const error = sendErrorStatus(err);
-    res.status(error.status || 500).send({ message:error.message || err.message });
+    res.status(error.status).send({ message:error.message || err.message });
   });
 };
 
@@ -50,15 +51,12 @@ module.exports.likeItem = (req, res) => {
 
   Item.findByIdAndUpdate(
     _id,
-    { $addToSet: { likes: Item.owner } },
+    { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .orFail()
     .then(like => {
-      const idError = checkObjectId(like.owner.toString(), req.user._id.toString());
-      if (idError) throw idError;
-
-      res.status(200).send({ data: like });
+      res.send({ data: like });
     })
     .catch(err => {
       console.error(err);
@@ -72,15 +70,12 @@ module.exports.dislikeItem = (req, res) => {
 
   Item.findByIdAndUpdate(
     _id,
-    { $pull: { likes: Item.owner } },
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
     .orFail()
     .then(like => {
-    const idError = checkObjectId(like.owner.toString(), req.user._id.toString());
-    if (idError) throw idError;
-
-      res.status(200).send({ data: like });
+      res.send({ data: like });
     })
     .catch(err => {
       console.error(err);

@@ -1,37 +1,8 @@
-class ValidationError extends Error {
-  constructor() {
-    super();
-    this.name = "ValidationError";
-  }
-}
-
-class DocumentNotFoundError extends Error {
-  constructor() {
-    super();
-    this.name = "DocumentNotFoundError";
-  }
-}
-
-class AuthenticationError extends Error {
-  constructor() {
-    super();
-    this.name = "AuthenticationError";
-  }
-}
-
-class IdentificationError extends Error {
-  constructor(){
-    super();
-    this.name = "IdentificationError";
-  }
-}
-
-class ConflictError extends Error {
-  constructor(){
-    super();
-    this.name = "ConflictError";
-  }
-}
+const AuthenticationError = require('./AuthenticationError');
+const ConflictError = require('./ConflictError');
+const DocumentNotFoundError = require('./DocumentNotFoundError');
+const IdentificationError = require('./IdentificationError');
+const ValidationError = require('./ValidationError');
 
 const statusDict = {
   validationErrorStatus: { status: 400, message: "Invalid or missing entry" },
@@ -65,21 +36,21 @@ module.exports.sendErrorStatus = (err) => {
   return statusDict.defaultErrorStatus;
 };
 
-module.exports.checkObjectId = (objectId, otherId) => objectId === otherId ? false : new IdentificationError();
+module.exports.checkObjectId = (res, objectId, otherId) => String(objectId) === otherId ? false : res.status(statusDict.identificationErrorStatus.status).send({ message: statusDict.identificationErrorStatus.message });
 
 module.exports.checkForConflict = (match) => match ? new ConflictError() : false;
 
-module.exports.checkUserExists = (match) => !match ? new ValidationError() : false;
+module.exports.checkUserExists = (exists) => exists ? false : new AuthenticationError();
 
-module.exports.checkUserPassword = (match) => !match ? new AuthenticationError() : false;
+module.exports.checkForMatch = (match, user) => !match ? new AuthenticationError() : user;
 
-module.exports.handleAuthError = (res, message) => res.status(401).send({ message });
+module.exports.handleAuthError = (res) => res.status(statusDict.authenticationErrorStatus.status).send({ message: statusDict.authenticationErrorStatus.message });
 
 module.exports.handleMissingField = () => Promise.reject(new ValidationError());
 
 module.exports.handleUnknownRoute = (req, res, next) => {
   if (!res.status.ok) {
-    throw new DocumentNotFoundError();
+    return res.status(statusDict.documentNotFoundErrorStatus.status).send({ message: statusDict.documentNotFoundErrorStatus.message });
   }
   next();
 };

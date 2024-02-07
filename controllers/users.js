@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
-const { sendErrorStatus, checkObjectId } = require('../utils/errors');
+const { sendErrorStatus } = require('../utils/errors');
 
 const { JWT_SECRET, NODE_ENV } = process.env;
 
@@ -9,7 +9,7 @@ module.exports.createUser = (req, res) => {
 
   User.signupNewUser({ name, avatar, email, password })
   .then(() => {
-    res.status(200).send({
+    res.send({
       data: { name, avatar, email }
     })
   })
@@ -27,33 +27,27 @@ module.exports.getCurrentUser = (req, res) => {
     .orFail()
     .then(user => {
       const { name, avatar, email } = user;
-      const idError = checkObjectId(user._id.toString(), req.user._id.toString());
-      if (idError) throw idError;
-
-      res.status(200).send({ data: { name, avatar, email } });
+      res.send({ data: { name, avatar, email } });
     })
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status || 500).send({ message:error.message || err.message });
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };
 
 module.exports.updateUser = (req, res) => {
   const { _id } = req.user;
 
-  User.findByIdAndUpdate({ _id }, { name:req.body.name, avatar:req.body.avatar }, {new: true})
+  User.findByIdAndUpdate({ _id }, { name:req.body.name, avatar:req.body.avatar }, { new: true, runValidators: true })
     .orFail()
     .then(user => {
-      const idError = checkObjectId(user._id.toString(), req.user._id.toString());
-      if (idError) throw idError;
-
-      res.status(200).send({ data: user });
+      res.send({ data: user });
     })
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status || 500).send({ message:error.message || err.message });
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };
 
@@ -62,7 +56,7 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      res.status(200).send({
+      res.send({
         data: { name, avatar, email },
         token: jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev_secret', { expiresIn: '7d' })
       });
@@ -70,6 +64,6 @@ module.exports.login = (req, res) => {
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status || 500).send({ message:error.message || err.message });
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };

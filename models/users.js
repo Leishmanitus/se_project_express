@@ -41,20 +41,18 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
 
   return this.findOne({ email })
     .select('+password')
-    .then(user => {
-      return this.exists({ email }).then(exists => {
-        const existsError = checkUserExists(exists);
-        if (existsError) throw existsError;
+    .then(user => this.exists({ email }) ? user : false).then(user => {
+      const existsError = checkUserExists(user);
+      if (existsError) throw existsError;
 
-        return user;
-      });
-    })
-    .then(user => {
       return bcrypt.compare(password, user.password)
-        .then((match) => {
-          return checkForMatch(match, user);
+        .then(match => {
+          const matchError = checkForMatch(match);
+          if (matchError) throw matchError;
+
+          return user;
         });
-    });
+      });
 };
 
 userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email, password }) {

@@ -1,7 +1,5 @@
 const AuthenticationError = require('./AuthenticationError');
 const ConflictError = require('./ConflictError');
-const DocumentNotFoundError = require('./DocumentNotFoundError');
-const IdentificationError = require('./IdentificationError');
 const ValidationError = require('./ValidationError');
 
 const statusDict = {
@@ -42,7 +40,7 @@ module.exports.checkForConflict = (match) => match ? new ConflictError() : false
 
 module.exports.checkUserExists = (exists) => exists ? false : new AuthenticationError();
 
-module.exports.checkForMatch = (match, user) => !match ? new AuthenticationError() : user;
+module.exports.checkForMatch = (match) => !match ? new AuthenticationError() : false;
 
 module.exports.handleAuthError = (res) => res.status(statusDict.authenticationErrorStatus.status).send({ message: statusDict.authenticationErrorStatus.message });
 
@@ -52,5 +50,5 @@ module.exports.handleUnknownRoute = (req, res, next) => {
   if (!res.status.ok) {
     return res.status(statusDict.documentNotFoundErrorStatus.status).send({ message: statusDict.documentNotFoundErrorStatus.message });
   }
-  next();
+  return next();
 };

@@ -52,12 +52,12 @@ module.exports.updateUser = (req, res) => {
 };
 
 module.exports.login = (req, res) => {
-  const { name, avatar, email, password } = req.body;
+  const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
-        data: { name, avatar, email },
+        data: { email },
         token: jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev_secret', { expiresIn: '7d' })
       });
     })

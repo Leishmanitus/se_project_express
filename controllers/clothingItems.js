@@ -17,7 +17,10 @@ module.exports.createItem = (req, res) => {
 
 module.exports.getItems = (req, res) => {
   Item.find({})
+    .populate('owner')
+    .populate('likes')
     .then(items => {
+      console.log(items);
       res.send({ data: items });
     })
     .catch(err => {

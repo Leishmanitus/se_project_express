@@ -67,7 +67,7 @@ userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email,
 
       return bcrypt.hash(password, 10);
     })
-    .then(hash => this.create({ name, avatar, email, password: hash }))
+    .then(hash => this.create({ name, avatar, email, password: hash }).then(user => user))
 };
 
 module.exports = mongoose.model('user', userSchema);

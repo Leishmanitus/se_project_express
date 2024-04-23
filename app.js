@@ -6,7 +6,7 @@ const routes = require('./routes/index');
 
 require('dotenv').config({path:'./configs/.env'});
 
-const {PORT=3001} = process.env;
+const { PORT=3001 } = process.env;
 const app = express();
 
 process.on('uncaughtException', (err, origin) => {
@@ -15,8 +15,8 @@ process.on('uncaughtException', (err, origin) => {
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db')
-.then(() => {console.log(`Connected to db`)})
-.catch(err => {console.error(`DB error: ${err.status}`)});
+.then(() => console.log(`Connected to db`))
+.catch(err => console.error(`DB error: ${err.status}`));
 
 app.use(cors());
 app.use(helmet());

@@ -9,10 +9,7 @@ module.exports.createUser = (req, res) => {
 
   User.signupNewUser({ name, avatar, email, password })
   .then((user) => {
-    const { name, avatar, _id } = user;
-    res.send({
-      data: { name, avatar, _id }
-    })
+    res.send({ data: user })
   })
   .catch(err => {
     console.error(err);
@@ -27,7 +24,8 @@ module.exports.getCurrentUser = (req, res) => {
   User.findById({ _id })
     .orFail()
     .then(user => {
-      res.send({ name: user.name, password: user.password, email: user.email, avatar: user.avatar, token: user.token, _id: _id });
+      const { name, email, avatar, _id, token } = user;
+      res.send({ data: { name, email, avatar, _id, token } });
     })
     .catch(err => {
       console.error(err);
@@ -42,7 +40,8 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate({ _id }, { name:req.body.name, avatar:req.body.avatar }, { new: true, runValidators: true })
     .orFail()
     .then(user => {
-      res.send({ data: user });
+      const { name, avatar } = user
+      res.send({ data: { name, avatar } });
     })
     .catch(err => {
       console.error(err);

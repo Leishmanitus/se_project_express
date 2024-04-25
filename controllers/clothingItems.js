@@ -62,7 +62,7 @@ module.exports.likeItem = (req, res) => {
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status).send({message:error.message || err.message});
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };
 
@@ -81,6 +81,6 @@ module.exports.dislikeItem = (req, res) => {
     .catch(err => {
       console.error(err);
       const error = sendErrorStatus(err);
-      res.status(error.status).send({message:error.message || err.message});
+      res.status(error.status).send({ message:error.message || err.message });
     });
 };

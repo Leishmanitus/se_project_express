@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { handleAuthError } = require('../utils/errors');
+const { default: mongoose } = require('mongoose');
 
 const { JWT_SECRET, NODE_ENV } = process.env;
 

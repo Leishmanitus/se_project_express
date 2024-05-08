@@ -9,7 +9,8 @@ module.exports.createUser = (req, res) => {
 
   User.signupNewUser({ name, avatar, email, password })
   .then((user) => {
-    res.send({ data: user })
+    const { name, avatar, _id, token } = user;
+    res.send({ data: { name, avatar, _id, token } })
   })
   .catch(err => {
     console.error(err);

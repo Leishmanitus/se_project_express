@@ -22,13 +22,11 @@ const clothingItemsSchema = new mongoose.Schema({
     }
   },
   owner: {
-    type: Object,
-    ref: 'user',
+    type: String,
     required: true,
   },
   likes: {
-    type: [mongoose.Types.ObjectId],
-    ref: 'user',
+    type: Array,
   },
   createdAt: {
     type: Date,

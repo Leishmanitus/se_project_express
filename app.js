@@ -7,7 +7,7 @@ const { errors } = require('celebrate')
 const { sendErrorStatus } = require('./utils/errors');
 const { requestLogger, errorLogger } = require('./middleware/logger');
 
-require('dotenv').config({path:'./configs/.env'});
+require('dotenv').config();
 
 const { PORT=3001 } = process.env;
 const app = express();

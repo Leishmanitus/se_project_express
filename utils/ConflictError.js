@@ -1,7 +1,8 @@
 class ConflictError extends Error {
-  constructor(){
-    super();
+  constructor(message = "Already exists in database"){
+    super(message);
     this.name = "ConflictError";
+    this.status = 409;
   }
 }
 

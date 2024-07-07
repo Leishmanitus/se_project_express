@@ -1,54 +1,50 @@
 const AuthenticationError = require('./AuthenticationError');
 const ConflictError = require('./ConflictError');
 const ValidationError = require('./ValidationError');
+const IdentificationError = require('./IdentificationError');
+const DocumentNotFoundError = require('./DocumentNotFoundError');
+const BadRequestError = require('./BadRequestError');
 
-const statusDict = {
-  validationErrorStatus: { status: 400, message: "Invalid or missing entry" },
-  castErrorStatus: { status: 400, message: "Could not cast ObjectId" },
-  authenticationErrorStatus: { status: 401, message: "Incorrect email or password" },
-  identificationErrorStatus: { status: 403, message: "Not allowed" },
-  documentNotFoundErrorStatus: { status: 404, message: "Does not exist" },
-  conflictErrorStatus: { status: 409, message: "Already exists in database" },
-  defaultErrorStatus: { status: 500, message: "Internal Server Error" },
-}
-
-module.exports.sendErrorStatus = (err) => {
-  if(err.name === "ValidationError"){
-    return statusDict.validationErrorStatus;
+module.exports.sendErrorStatus = (err, req, res, next) => {
+  console.error(err);
+  switch (err.name) {
+    case "BadRequestError":
+      next(new ValidationError());
+      break;
+    case "DocumentNotFoundError":
+      next(new DocumentNotFoundError());
+      break;
+    case "AuthenticationError":
+      next(new AuthenticationError());
+      break;
+    case "ConflictError":
+      next(new ConflictError());
+      break;
+    case "IdentificationError":
+      next(new IdentificationError());
+      break;
+    default:
+      next(new Error("Internal server error"));
   }
-  if(err.name === "CastError"){
-    return statusDict.castErrorStatus;
-  }
-  if(err.name === "DocumentNotFoundError"){
-    return statusDict.documentNotFoundErrorStatus;
-  }
-  if(err.name === "AuthenticationError"){
-    return statusDict.authenticationErrorStatus;
-  }
-  if(err.name === "ConflictError"){
-    return statusDict.conflictErrorStatus;
-  }
-  if(err.name === "IdentificationError"){
-    return statusDict.identificationErrorStatus;
-  }
-  return statusDict.defaultErrorStatus;
 };
 
-module.exports.checkObjectId = (res, objectId, otherId) => String(objectId) === otherId ? false : res.status(statusDict.identificationErrorStatus.status).send({ message: statusDict.identificationErrorStatus.message });
+module.exports.checkObjectId = (objectId, otherId) => String(objectId) === otherId ? false : Promise.reject(new BadRequestError());
 
-module.exports.checkForConflict = (match) => match ? new ConflictError() : false;
+module.exports.checkForConflict = (match) => match ? Promise.reject(new ConflictError()) : false;
 
-module.exports.checkUserExists = (exists) => exists ? false : new AuthenticationError();
+module.exports.checkUserExists = (exists) => exists ? false : Promise.reject(new AuthenticationError());
 
-module.exports.checkForMatch = (match) => !match ? new AuthenticationError() : false;
+module.exports.checkForMatch = (match) => !match ? Promise.reject(new AuthenticationError()) : false;
 
-module.exports.handleAuthError = (res) => res.status(statusDict.authenticationErrorStatus.status).send({ message: statusDict.authenticationErrorStatus.message });
+module.exports.handleAuthError = (message) => {
+  Promise.reject(new AuthenticationError(message));
+};
 
 module.exports.handleMissingField = () => Promise.reject(new ValidationError());
 
 module.exports.handleUnknownRoute = (req, res, next) => {
   if (!res.status.ok) {
-    return res.status(statusDict.documentNotFoundErrorStatus.status).send({ message: statusDict.documentNotFoundErrorStatus.message });
+    return Promise.reject(new DocumentNotFoundError());
   }
   return next();
 };

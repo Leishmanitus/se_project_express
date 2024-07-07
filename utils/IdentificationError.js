@@ -1,7 +1,8 @@
 class IdentificationError extends Error {
-  constructor(){
-    super();
+  constructor(message = "Not allowed"){
+    super(message);
     this.name = "IdentificationError";
+    this.status = 403;
   }
 }
 

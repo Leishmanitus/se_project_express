@@ -1,7 +1,8 @@
 class AuthenticationError extends Error {
-  constructor() {
-    super();
+  constructor(message = "Incorrect email or password") {
+    super(message);
     this.name = "AuthenticationError";
+    this.status = 401;
   }
 }
 

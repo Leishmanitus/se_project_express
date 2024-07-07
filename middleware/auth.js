@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { handleAuthError } = require('../utils/errors');
-const { default: mongoose } = require('mongoose');
 
 const { JWT_SECRET, NODE_ENV } = process.env;
 
@@ -10,7 +9,7 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res, "Authorization header is missing or invalid");
+    return handleAuthError("Authorization header is missing or invalid");
   }
 
   const token = extractToken(authorization);
@@ -19,12 +18,12 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev_secret');
   } catch (err) {
-    return handleAuthError(res, "Token is invalid or has expired");
+    return handleAuthError("Token is invalid or has expired");
   }
 
   const currentTime = Math.floor(Date.now() / 1000);
   if(payload.exp && payload.exp < currentTime){
-    return handleAuthError(res, "Token has expired");
+    return handleAuthError("Token has expired");
   }
 
   req.user = payload;

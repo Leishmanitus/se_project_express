@@ -41,14 +41,14 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
 
   return this.findOne({ email })
     .select('+password')
-    .then(user => this.exists({ email }) ? user : false).then(user => {
+    .then(user => {
       const existsError = checkUserExists(user);
-      if (existsError) throw existsError;
+      if (existsError) return existsError;
 
       return bcrypt.compare(password, user.password)
         .then(match => {
           const matchError = checkForMatch(match);
-          if (matchError) throw matchError;
+          if (matchError) return matchError;
 
           return user;
         });
@@ -60,10 +60,10 @@ userSchema.statics.signupNewUser = function signupNewUser({ name, avatar, email,
     return handleMissingField();
   }
 
-  return this.exists({ email })
+  return this.findOne({ email })
     .then(duplicate => {
       const conflictError = checkForConflict(duplicate);
-      if(conflictError) throw conflictError;
+      if(conflictError) return conflictError;
 
       return bcrypt.hash(password, 10);
     })

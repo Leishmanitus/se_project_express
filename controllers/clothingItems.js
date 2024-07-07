@@ -1,53 +1,40 @@
 const Item = require('../models/clothingItems');
-const { sendErrorStatus, checkObjectId } = require('../utils/errors');
 
-module.exports.createItem = (req, res) => {
+module.exports.createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   Item.create({ name, weather, imageUrl, owner: req.user._id })
   .then(item => {
     res.send({ data: item });
   })
-  .catch(err => {
-    console.error(err);
-    const error = sendErrorStatus(err);
-    res.status(error.status).send({ message:error.message || err.message });
-  });
+  .catch(next);
 };
 
-module.exports.getItems = (req, res) => {
+module.exports.getItems = (req, res, next) => {
   Item.find({})
     .populate('owner')
     .populate('likes')
     .then(items => {
       res.send({ data: items });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch(next);
 };
 
-module.exports.deleteItem = (req, res) => {
+module.exports.deleteItem = (req, res, next) => {
   const { _id } = req.params;
 
   Item.findById({ _id })
   .orFail()
   .then(item => {
-    const idError = checkObjectId(res, item.owner, req.user._id);
+    const idError = checkObjectId(item.owner, req.user._id);
     if (idError) return idError;
 
     return item.deleteOne().then(() => res.send({ message: "Item deleted" }));
   })
-  .catch(err => {
-    console.error(err);
-    const error = sendErrorStatus(err);
-    res.status(error.status).send({ message:error.message || err.message });
-  });
+  .catch((err) => err.name === "CastError" ? next(new BadRequestError()) : next(err));
 };
 
-module.exports.likeItem = (req, res) => {
+module.exports.likeItem = (req, res, next) => {
   const { _id } = req.params;
 
   Item.findByIdAndUpdate(
@@ -59,14 +46,10 @@ module.exports.likeItem = (req, res) => {
     .then(like => {
       res.send({ data: like });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch((err) => err.name === "CastError" ? next(new BadRequestError()) : next(err));
 };
 
-module.exports.dislikeItem = (req, res) => {
+module.exports.dislikeItem = (req, res, next) => {
   const { _id } = req.params;
 
   Item.findByIdAndUpdate(
@@ -78,9 +61,5 @@ module.exports.dislikeItem = (req, res) => {
     .then(like => {
       res.send({ data: like });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch((err) => err.name === "CastError" ? next(new BadRequestError()) : next(err));
 };

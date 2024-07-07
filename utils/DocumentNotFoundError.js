@@ -1,7 +1,8 @@
 class DocumentNotFoundError extends Error {
-  constructor() {
-    super();
+  constructor(message = "Does not exist") {
+    super(message);
     this.name = "DocumentNotFoundError";
+    this.status = 404;
   }
 }
 

@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
-const { sendErrorStatus } = require('../utils/errors');
+const DocumentNotFoundError = require('../utils/DocumentNotFoundError');
+const BadRequestError = require('../utils/BadRequestError');
 
 const { JWT_SECRET, NODE_ENV } = process.env;
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   User.signupNewUser({ name, avatar, email, password })
@@ -12,30 +13,25 @@ module.exports.createUser = (req, res) => {
     const { name, avatar, _id, token } = user;
     res.send({ data: { name, avatar, _id, token } })
   })
-  .catch(err => {
-    console.error(err);
-    const error = sendErrorStatus(err);
-    res.status(error.status).send({ message:error.message || err.message });
-  });
+  .catch(next);
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById({ _id })
     .orFail()
     .then(user => {
+      if (!user) {
+        throw new DocumentNotFoundError("User does not exist");
+      }
       const { name, email, avatar, _id, token } = user;
       res.send({ data: { name, email, avatar, _id, token } });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch((err) => err.name === "CastError" ? next(new BadRequestError()) : next(err));
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { _id } = req.user;
 
   User.findByIdAndUpdate({ _id }, { name:req.body.name, avatar:req.body.avatar }, { new: true, runValidators: true })
@@ -44,14 +40,10 @@ module.exports.updateUser = (req, res) => {
       const { name, avatar } = user
       res.send({ data: { name, avatar } });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch((err) => err.name === "CastError" ? next(new BadRequestError()) : next(err));
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -68,9 +60,5 @@ module.exports.login = (req, res) => {
 
       });
     })
-    .catch(err => {
-      console.error(err);
-      const error = sendErrorStatus(err);
-      res.status(error.status).send({ message:error.message || err.message });
-    });
+    .catch(next);
 };

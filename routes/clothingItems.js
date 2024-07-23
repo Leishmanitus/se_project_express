@@ -3,10 +3,10 @@ const { createItem, getItems, deleteItem, likeItem, dislikeItem } = require('../
 const auth = require('../middleware/auth');
 const { validateId, validateItemData } = require('../middleware/validation');
 
-router.post('/', validateItemData, auth, createItem);
+router.post('/', auth, validateItemData, createItem);
 router.get('/', getItems);
-router.delete('/:_id', validateId, auth, deleteItem);
-router.put('/:_id/likes', validateId, auth, likeItem);
-router.delete('/:_id/likes', validateId, auth, dislikeItem);
+router.delete('/:_id', auth, validateId, deleteItem);
+router.put('/:_id/likes', auth, validateId, likeItem);
+router.delete('/:_id/likes', auth, validateId, dislikeItem);
 
 module.exports = router;

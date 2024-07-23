@@ -2,9 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cors = require('cors');
+const { errors } = require('celebrate');
 const routes = require('./routes/index');
-const { errors } = require('celebrate')
-const { sendErrorStatus } = require('./utils/errors');
 const { requestLogger, errorLogger } = require('./middleware/logger');
 
 require('dotenv').config();
@@ -46,10 +45,6 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send({
     message: err.message || "Internal server error",
   });
-});
-
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Route not found' });
 });
 
 process.on('unhandledRejection', (reason, promise) => {

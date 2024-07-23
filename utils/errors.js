@@ -9,6 +9,12 @@ module.exports.sendErrorStatus = (err, req, res, next) => {
   console.error(err);
   switch (err.name) {
     case "BadRequestError":
+      next(new BadRequestError());
+      break;
+    case "CastError":
+      next(new BadRequestError());
+      break;
+    case "ValidationError":
       next(new ValidationError());
       break;
     case "DocumentNotFoundError":
@@ -42,9 +48,4 @@ module.exports.handleAuthError = (message) => {
 
 module.exports.handleMissingField = () => Promise.reject(new ValidationError());
 
-module.exports.handleUnknownRoute = (req, res, next) => {
-  if (!res.status.ok) {
-    return Promise.reject(new DocumentNotFoundError());
-  }
-  return next();
-};
+module.exports.handleUnknownRoute = (req, res, next) => next(new DocumentNotFoundError());

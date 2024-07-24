@@ -5,7 +5,7 @@ const IdentificationError = require('./IdentificationError');
 const DocumentNotFoundError = require('./DocumentNotFoundError');
 const BadRequestError = require('./BadRequestError');
 
-module.exports.sendErrorStatus = (err, req, res, next) => {
+module.exports.sendErrorStatus = (err, next) => {
   console.error(err);
   switch (err.name) {
     case "BadRequestError":

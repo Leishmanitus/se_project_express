@@ -8,7 +8,7 @@ module.exports.createItem = (req, res, next) => {
   Item
     .create({ name, weather, imageUrl, owner: req.user._id })
     .then(item => res.send({ data: item }))
-    .catch(sendErrorStatus);
+    .catch(err => sendErrorStatus(err, next));
 };
 
 module.exports.getItems = (req, res, next) => {
@@ -17,7 +17,7 @@ module.exports.getItems = (req, res, next) => {
     .populate('owner')
     .populate('likes')
     .then(items => res.send({ data: items }))
-    .catch(sendErrorStatus);
+    .catch(err => sendErrorStatus(err, next));
 };
 
 module.exports.deleteItem = (req, res, next) => {
@@ -26,7 +26,7 @@ module.exports.deleteItem = (req, res, next) => {
   Item
     .findById({ _id })
     .then(item => {
-      if (!item) return new DocumentNotFoundError("Item does not exist");
+      if (!item) throw new DocumentNotFoundError("Item does not exist");
       const idError = checkObjectId(item.owner, req.user._id);
       if (idError) return idError;
 
@@ -34,7 +34,7 @@ module.exports.deleteItem = (req, res, next) => {
           .deleteOne()
           .then(() => res.send({ message: "Item deleted" }));
       })
-    .catch(sendErrorStatus);
+      .catch(err => sendErrorStatus(err, next));
 };
 
 module.exports.likeItem = (req, res, next) => {
@@ -47,10 +47,10 @@ module.exports.likeItem = (req, res, next) => {
       { new: true },
     )
     .then(like => {
-      if (!like) return new DocumentNotFoundError("Item does not exist");
+      if (!like) throw new DocumentNotFoundError("Item does not exist");
       return res.send({ data: like });
     })
-    .catch(sendErrorStatus);
+    .catch(err => sendErrorStatus(err, next));
 };
 
 module.exports.dislikeItem = (req, res, next) => {
@@ -63,8 +63,8 @@ module.exports.dislikeItem = (req, res, next) => {
       { new: true },
     )
     .then(like => {
-      if (!like) return new DocumentNotFoundError("Item does not exist");
+      if (!like) throw new DocumentNotFoundError("Item does not exist");
       return res.send({ data: like });
     })
-    .catch(sendErrorStatus);
+    .catch(err => sendErrorStatus(err, next));
 };

@@ -72,6 +72,4 @@ To run the project locally, follow these steps:
 ## Links
 - Link to the Front-End repo: (https://github.com/Leishmanitus/se_project_react.git)
 - Link to the Back-End repo: (https://github.com/Leishmanitus/se_project_express.git)
-- Link to the site: (https://www.alphazoo.crabdance.com)
-- Link to api: (https://api.alphazoo.crabdance.com)
-
+- Link to the site: (https://api.alphazoo.crabdance.com)
